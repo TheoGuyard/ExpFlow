@@ -28,12 +28,13 @@ class Runner:
         experiment = experiment_type(config_path)
         for repeat in range(repeats):
             if self.verbose:
-                print()
                 print("repeat {}/{}".format(repeat + 1, repeats))
             experiment.setup()
             result = experiment.run()
-            experiment.save_result(result, results_dir)
+            result_path = experiment.save_result(result, results_dir)
             experiment.cleanup()
+            if self.verbose:
+                print("result path: {}".format(result_path))
 
     def plot(
         self,
@@ -69,4 +70,6 @@ class Runner:
         if save_dir is not None:
             if self.verbose:
                 print("saving...")
-            experiment.save_plot(self.plot_data, save_dir)
+            plot_path = experiment.save_plot(self.plot_data, save_dir)
+            if self.verbose:
+                print("plot path: {}".format(plot_path))

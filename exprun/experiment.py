@@ -4,7 +4,7 @@ import string
 import yaml
 from abc import abstractmethod
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 
 class Experiment:
@@ -26,7 +26,7 @@ class Experiment:
     @abstractmethod
     def plot(results: list) -> dict: ...
 
-    def save_result(self, result: dict, results_dir: Union[str, Path]) -> None:
+    def save_result(self, result: dict, results_dir: Union[str, Path]) -> str:
         uuid_chars = string.ascii_lowercase
         output_uuid = "".join(random.choice(uuid_chars) for _ in range(20))
         output_name = "{}_{}.pkl".format(self.__class__.__name__, output_uuid)
@@ -36,11 +36,13 @@ class Experiment:
             data = {"config": self.config, "result": result}
             pickle.dump(data, file)
 
-    def load_result(self, file_path: Union[str, Path]):
+        return str(output_path)
+
+    def load_result(self, file_path: Union[str, Path]) -> Any:
         with open(file_path, "rb") as file:
             return pickle.load(file)
 
-    def find_results(self, results_dir: Union[str, Path]):
+    def find_results(self, results_dir: Union[str, Path]) -> list[Any]:
         matching_results = []
         result_pattern = "{}_*.pkl".format(self.__class__.__name__)
         for result_path in Path(results_dir).glob(result_pattern):
@@ -49,7 +51,7 @@ class Experiment:
                 matching_results.append(result_data["result"])
         return matching_results
 
-    def save_plot(self, plot_data: dict, save_dir: Union[str, Path]) -> None:
+    def save_plot(self, plot_data: dict, save_dir: Union[str, Path]) -> str:
         uuid_chars = string.ascii_lowercase
         output_uuid = "".join(random.choice(uuid_chars) for _ in range(20))
         output_name = "{}_{}.pkl".format(self.__class__.__name__, output_uuid)
@@ -58,3 +60,5 @@ class Experiment:
         with open(output_path, "wb") as file:
             data = {"config": self.config, "plot_data": plot_data}
             pickle.dump(data, file)
+
+        return str(output_path)
